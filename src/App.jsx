@@ -47,6 +47,21 @@ function cleanForTTS(text) {
   return clean;
 }
 
+// Prioridad de idiomas: colombiano > latinoamericano > cualquier español
+const LANG_PRIORITY = ["es-CO", "es-US", "es-419", "es-MX", "es-AR", "es-CL", "es-PE", "es-VE", "es"];
+
+function getBestSpanishVoice() {
+  const synth = window.speechSynthesis;
+  if (!synth) return null;
+  const voices = synth.getVoices();
+  for (const lang of LANG_PRIORITY) {
+    const match = voices.find(v => v.lang === lang || v.lang.startsWith(lang));
+    if (match) return match;
+  }
+  // Último recurso: cualquier voz en español
+  return voices.find(v => v.lang.startsWith("es")) || null;
+}
+
 export default function App() {
   const [pendingVoiceMessage, setPendingVoiceMessage] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -74,6 +89,11 @@ export default function App() {
     utt.lang = "es-CO";
     utt.rate = 0.88;   // más pausado, más natural
     utt.pitch = 1.05;  // tono ligeramente más cálido
+
+    // Seleccionar la mejor voz española disponible (prefiere colombiana)
+    const voz = getBestSpanishVoice();
+    if (voz) utt.voice = voz;
+
     utt.onstart = () => setIsSpeaking(true);
     utt.onend = () => setIsSpeaking(false);
     utt.onerror = () => setIsSpeaking(false);

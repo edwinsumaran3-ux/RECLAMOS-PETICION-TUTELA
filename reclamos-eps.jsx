@@ -844,16 +844,87 @@ const URGENCIA_STYLE = {
   "CRÍTICO": { bg: "#c0392b", color: "#fff" },
 };
 
+const SERVICIOS_OPTIONS = [
+  "Cita con médico general demorada o negada",
+  "Cita con especialista demorada o negada (cardiólogo, neurólogo, ortopedista, etc.)",
+  "Cita con odontólogo demorada o negada",
+  "Cita con ginecólogo / obstetra demorada o negada",
+  "Cita con pediatra demorada o negada",
+  "Cita con psiquiatra o psicólogo demorada o negada",
+  "Medicamento no entregado o negado",
+  "Medicamento fuera del PBS negado (no POS)",
+  "Cirugía o procedimiento quirúrgico pendiente o negado",
+  "Examen de laboratorio clínico pendiente o negado",
+  "Imágenes diagnósticas (resonancia, TAC, ecografía, rayos X) negadas",
+  "Autorización de servicio negada sin justificación",
+  "Hospitalización negada o demorada",
+  "Atención de urgencias negada",
+  "Alta médica prematura o sin adecuado tratamiento",
+  "Continuidad de tratamiento interrumpida",
+  "Incapacidad laboral no tramitada, demorada o negada",
+  "Reembolso de gastos médicos pendiente o negado",
+  "Traslado a otra IPS negado",
+  "Atención domiciliaria negada",
+  "Fisioterapia o rehabilitación negada",
+  "Suministro de dispositivo médico, prótesis u órtesis negado",
+  "Atención en salud mental negada",
+  "Tratamiento oncológico negado o demorado",
+  "Diálisis o trasplante de órganos negado o demorado",
+  "Vacunación o programa preventivo negado",
+  "Atención a menor de edad negada o demorada",
+  "Atención a adulto mayor negada o demorada",
+  "Atención a persona con discapacidad negada",
+  "Atención a mujer embarazada negada o demorada",
+  "Cobro indebido o error en facturación",
+  "Problema con afiliación o traslado de EPS",
+  "Otro",
+];
+
+const SOLICITUDES_OPTIONS = [
+  "Asignar cita con médico general dentro de los próximos 3 días",
+  "Asignar cita con especialista de manera urgente",
+  "Asignar cita con odontólogo de manera inmediata",
+  "Asignar cita con ginecólogo / obstetra de manera urgente",
+  "Asignar cita con pediatra de manera inmediata",
+  "Asignar cita con psiquiatra o psicólogo de manera urgente",
+  "Entregar el medicamento prescrito de forma inmediata",
+  "Autorizar y entregar el medicamento no PBS (no POS) prescrito",
+  "Autorizar y programar la cirugía o procedimiento quirúrgico",
+  "Ordenar y realizar el examen de laboratorio",
+  "Autorizar y realizar las imágenes diagnósticas (resonancia, TAC, ecografía)",
+  "Autorizar la prestación del servicio de salud solicitado",
+  "Autorizar la hospitalización de inmediato",
+  "Brindar atención de urgencias sin obstáculos",
+  "Garantizar la continuidad del tratamiento médico",
+  "Tramitar y expedir la incapacidad laboral dentro de los plazos",
+  "Realizar el reembolso de los gastos médicos pagados de bolsillo",
+  "Autorizar el traslado a otra IPS con mejor capacidad",
+  "Brindar atención domiciliaria al paciente",
+  "Autorizar la fisioterapia o rehabilitación prescrita",
+  "Suministrar el dispositivo médico, prótesis u órtesis prescrito",
+  "Garantizar la atención en salud mental de forma oportuna",
+  "Garantizar el tratamiento oncológico sin interrupciones",
+  "Autorizar y garantizar el acceso a diálisis o trasplante",
+  "Garantizar la vacunación o programa preventivo negado",
+  "Corregir y suspender el cobro indebido",
+  "Dar respuesta formal por escrito dentro de los 15 días hábiles (Ley 1755 de 2015)",
+  "Garantizar los derechos de mi menor de edad como afiliado",
+  "Garantizar la atención preferencial al adulto mayor",
+  "Garantizar la atención adecuada a la persona con discapacidad",
+  "Garantizar la atención prioritaria a la mujer embarazada",
+  "Otro",
+];
+
 const CAMPOS_CONFIG = [
   { key: "eps",                label: "EPS",                       requerido: true,  placeholder: "Nombre de la EPS (ej: Nueva EPS, Sanitas...)" },
   { key: "nombre",             label: "Nombre completo",           requerido: true,  placeholder: "Nombres y apellidos completos" },
   { key: "cedula",             label: "Cédula / Documento",        requerido: true,  placeholder: "Número de cédula" },
   { key: "contacto",           label: "Teléfono / Correo",         requerido: true,  placeholder: "Correo o teléfono para notificaciones" },
   { key: "ciudad",             label: "Ciudad",                    requerido: false, placeholder: "Ciudad de residencia" },
-  { key: "servicio_solicitado",label: "Servicio o problema",       requerido: true,  placeholder: "Ej: cita con cardiólogo, medicamento, cirugía..." },
+  { key: "servicio_solicitado",label: "Servicio o problema",       requerido: true,  placeholder: "Describe tu caso específico...", opciones: SERVICIOS_OPTIONS },
   { key: "desde_cuando",       label: "¿Desde cuándo espera?",     requerido: true,  placeholder: "Ej: 3 meses, desde enero 2025..." },
   { key: "respuesta_eps",      label: "Respuesta de la EPS",       requerido: false, placeholder: "Lo que respondió la EPS, o: Sin respuesta" },
-  { key: "solicitud_concreta", label: "¿Qué le pide a la EPS?",   requerido: true,  placeholder: "Ej: asignar cita, entregar medicamento, autorizar cirugía..." },
+  { key: "solicitud_concreta", label: "¿Qué le pide a la EPS?",   requerido: true,  placeholder: "Describe qué quieres que haga la EPS...", opciones: SOLICITUDES_OPTIONS },
   { key: "tipo_documento",     label: "Tipo de documento",         requerido: true,  placeholder: "", esSelect: true },
 ];
 
@@ -864,17 +935,48 @@ function esPendiente(v) { return !v || v.trim() === "" || v === "[DATO PENDIENTE
 function ConfirmacionDatos({ datos, onConfirmar }) {
   const [form, setForm] = useState(() => {
     const f = {};
-    CAMPOS_CONFIG.forEach(c => { f[c.key] = esPendiente(datos[c.key]) ? "" : datos[c.key]; });
+    CAMPOS_CONFIG.forEach(c => {
+      const val = esPendiente(datos[c.key]) ? "" : datos[c.key];
+      if (c.opciones) {
+        if (!val || c.opciones.includes(val)) {
+          f[c.key] = val;
+          f[`${c.key}_otro`] = "";
+        } else {
+          f[c.key] = "Otro";
+          f[`${c.key}_otro`] = val;
+        }
+      } else {
+        f[c.key] = val;
+      }
+    });
     return f;
   });
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
 
-  const faltantes = CAMPOS_CONFIG.filter(c => c.requerido && esPendiente(form[c.key]));
+  const faltantes = CAMPOS_CONFIG.filter(c => {
+    if (!c.requerido) return false;
+    if (esPendiente(form[c.key])) return true;
+    if (c.opciones && form[c.key] === "Otro" && !form[`${c.key}_otro`]?.trim()) return true;
+    return false;
+  });
   const listo = faltantes.length === 0;
 
   const tipo = form.tipo_documento || "DERECHO DE PETICIÓN";
   const tipoStyle = TIPO_LABEL[tipo] || TIPO_LABEL["DERECHO DE PETICIÓN"];
+
+  const handleConfirmar = () => {
+    if (!listo) return;
+    const datosFinales = { ...datos };
+    CAMPOS_CONFIG.forEach(c => {
+      if (c.opciones && form[c.key] === "Otro") {
+        datosFinales[c.key] = form[`${c.key}_otro`]?.trim() || "Otro";
+      } else {
+        datosFinales[c.key] = form[c.key];
+      }
+    });
+    onConfirmar(datosFinales);
+  };
 
   return (
     <div style={{ background: "#fff", border: "1.5px solid #2d8c5e", borderRadius: 16, overflow: "hidden", marginTop: 12, fontFamily: "system-ui", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
@@ -893,21 +995,54 @@ function ConfirmacionDatos({ datos, onConfirmar }) {
       {/* Tabla editable */}
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
-          {CAMPOS_CONFIG.map(({ key, label, requerido, placeholder, esSelect }, i) => {
+          {CAMPOS_CONFIG.map(({ key, label, requerido, placeholder, esSelect, opciones }, i) => {
             const valor = form[key];
-            const vacio = requerido && esPendiente(valor);
+            const esOtro = opciones && valor === "Otro";
+            const vacio = requerido && (esPendiente(valor) || (esOtro && !form[`${key}_otro`]?.trim()));
             return (
               <tr key={key} style={{ background: i % 2 === 0 ? "#fff" : "#f8fbf9" }}>
                 <td style={{
                   padding: "8px 14px 8px 18px",
                   fontWeight: 700, fontSize: 11, color: vacio ? "#c0392b" : "#555",
                   width: "34%", borderBottom: "1px solid #eef2ef",
-                  verticalAlign: "middle", textTransform: "uppercase", letterSpacing: 0.3,
+                  verticalAlign: "top", paddingTop: 12, textTransform: "uppercase", letterSpacing: 0.3,
                 }}>
                   {label}{requerido && <span style={{ color: "#c0392b" }}> *</span>}
                 </td>
                 <td style={{ padding: "6px 14px 6px 8px", borderBottom: "1px solid #eef2ef" }}>
-                  {esSelect ? (
+                  {opciones ? (
+                    <>
+                      <select
+                        value={valor}
+                        onChange={e => {
+                          set(key, e.target.value);
+                          if (e.target.value !== "Otro") set(`${key}_otro`, "");
+                        }}
+                        style={{
+                          width: "100%", border: `1.5px solid ${vacio ? "#f5a0a0" : "#c8e6d4"}`,
+                          borderRadius: 7, padding: "6px 10px", fontSize: 13,
+                          background: vacio && !esOtro ? "#fff8f8" : "#fff", cursor: "pointer",
+                        }}
+                      >
+                        <option value="">— Selecciona una opción —</option>
+                        {opciones.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                      {esOtro && (
+                        <input
+                          type="text"
+                          value={form[`${key}_otro`] || ""}
+                          onChange={e => set(`${key}_otro`, e.target.value)}
+                          placeholder={placeholder}
+                          style={{
+                            width: "100%", border: `1.5px solid ${!form[`${key}_otro`]?.trim() ? "#f5a0a0" : "#c8e6d4"}`,
+                            borderRadius: 7, padding: "6px 10px", fontSize: 13,
+                            background: !form[`${key}_otro`]?.trim() ? "#fff8f8" : "#fff",
+                            outline: "none", boxSizing: "border-box", marginTop: 6,
+                          }}
+                        />
+                      )}
+                    </>
+                  ) : esSelect ? (
                     <select
                       value={valor}
                       onChange={e => set(key, e.target.value)}
@@ -946,7 +1081,7 @@ function ConfirmacionDatos({ datos, onConfirmar }) {
       {/* Botón */}
       <div style={{ padding: "14px 18px", background: "#f9fbf9", borderTop: "1px solid #e0e8e2" }}>
         <button
-          onClick={() => listo && onConfirmar({ ...datos, ...form })}
+          onClick={handleConfirmar}
           disabled={!listo}
           style={{
             width: "100%",
@@ -1334,13 +1469,74 @@ export default function EPSReclamaciones({ pendingVoiceMessage = "", onAssistant
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", height: "100vh", display: "flex", flexDirection: "column", background: "#f5f7f5" }}>
       <style>{`
+        * { box-sizing: border-box; }
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         .msg-in { animation: fadeIn 0.25s ease; }
         textarea:focus { outline: none; }
+        input:focus { outline: none; }
         button:active { transform: scale(0.97); }
         .quick-btn:hover { background: #e8f4ee !important; border-color: #2d8c5e !important; }
+
+        /* ── TABLA DE CONFIRMACIÓN ── */
+        .conf-row td { padding: 8px 14px; font-size: 13px; border-bottom: 1px solid #eef2ef; }
+        .conf-label { font-weight:700; font-size:11px; color:#555; text-transform:uppercase; letter-spacing:0.3px; width:34%; vertical-align:middle; }
+        .conf-value { font-size:13px; }
+        .conf-value input { width:100%; border:1.5px solid #c8e6d4; border-radius:7px; padding:6px 10px; font-size:13px; }
+        .conf-value input.vacio { border-color:#f5a0a0; background:#fff8f8; }
+        .conf-value select { width:100%; border:1.5px solid #c8e6d4; border-radius:7px; padding:6px 10px; font-size:13px; background:#fff; }
+
+        /* ── PANEL DE ENVÍO — botones ── */
+        .panel-btns { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+        .btn-enviar { flex:1; min-width:160px; padding:11px 14px; font-size:13px; font-weight:700; border:none; border-radius:9px; cursor:pointer; color:#fff; }
+        .btn-pdf    { padding:11px 14px; font-size:13px; font-weight:600; border-radius:9px; cursor:pointer; background:#fff; }
+
+        /* ── MÓVIL ── */
+        @media (max-width: 600px) {
+          /* Header compacto */
+          .app-header { padding: 10px 12px !important; }
+          .app-header-title { font-size: 14px !important; }
+          .app-header-sub   { font-size: 11px !important; }
+          .app-header-avatar { width:34px !important; height:34px !important; font-size:15px !important; }
+
+          /* Área de chat */
+          .chat-area { padding: 10px 10px !important; }
+          .msg-container { max-width: 100% !important; }
+
+          /* Burbujas */
+          .msg-bubble { max-width: 88% !important; }
+          .msg-text   { font-size: 13px !important; padding: 9px 12px !important; }
+
+          /* Documento generado */
+          .doc-card   { padding: 14px 12px !important; }
+          .doc-header { flex-direction: column !important; gap: 8px !important; align-items: flex-start !important; }
+          .doc-view   { max-height: 260px !important; }
+
+          /* Tabla de confirmación — una columna */
+          .conf-label { display: block; width: 100% !important; padding-bottom: 2px; }
+          .conf-value { display: block; width: 100% !important; padding-top: 2px; padding-bottom: 8px; }
+          .conf-row   { display: block !important; }
+
+          /* Botones del panel de envío — columna */
+          .panel-btns { flex-direction: column; }
+          .btn-enviar, .btn-pdf { width: 100% !important; min-width: unset !important; }
+
+          /* Modal de pago */
+          .pago-outer { align-items: flex-end !important; padding: 0 !important; }
+          .pago-inner { border-radius: 20px 20px 0 0 !important; max-width: 100% !important; width: 100% !important; }
+
+          /* Input area */
+          .input-area { padding: 8px 10px !important; }
+
+          /* Opciones rápidas — una columna */
+          .quick-grid { grid-template-columns: 1fr !important; }
+
+          /* Inicio */
+          .start-card { padding: 22px 16px !important; }
+          .start-title { font-size: 18px !important; }
+          .start-desc  { font-size: 13px !important; }
+        }
       `}</style>
 
       {/* Header */}
