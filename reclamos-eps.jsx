@@ -486,6 +486,168 @@ const TIPO_COLOR = {
   "TUTELA PRELIMINAR": [160, 30, 30],
 };
 
+// ─────────────────────────────────────────────────────────────
+// CONFIGURACIÓN DE PAGO
+// Reemplaza con tus datos reales de Wompi y Nequi/Daviplata
+// ─────────────────────────────────────────────────────────────
+const PAGO_CONFIG = {
+  monto: 5000,
+  montoTexto: "$5.000 COP",
+  nequiNumero: "305 4064232",
+  concepto: "Documento Legal EPS",
+  nombreCuenta: "Plataforma Reclamaciones EPS",
+};
+
+function PagoModal({ accion, onPagado, onCerrar }) {
+  const [paso, setPaso] = useState("nequi"); // nequi | procesando | gracias
+  const [referencia, setReferencia] = useState("");
+  const [error, setError] = useState("");
+
+  const iconAccion = accion === "enviar" ? "📧" : "⬇";
+  const textoAccion = accion === "enviar" ? "Enviar al EPS" : "Descargar PDF oficial";
+
+  const copiar = (txt) => navigator.clipboard.writeText(txt);
+
+  const confirmar = () => {
+    if (referencia.trim().length < 4) {
+      setError("Ingresa la referencia o número de comprobante de tu pago Nequi.");
+      return;
+    }
+    setPaso("procesando");
+    setTimeout(() => setPaso("gracias"), 2000);
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: "#fff", borderRadius: 22, width: "100%", maxWidth: 400, overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.35)", fontFamily: "system-ui" }}>
+
+        {/* HEADER */}
+        <div style={{ background: "linear-gradient(135deg, #2d8c5e 0%, #1a6644 100%)", padding: "20px 22px 18px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 42, height: 42, background: "rgba(255,255,255,0.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🏥</div>
+              <div>
+                <div style={{ color: "#fff", fontWeight: 800, fontSize: 16 }}>Activar documento</div>
+                <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>{iconAccion} {textoAccion}</div>
+              </div>
+            </div>
+            <button onClick={onCerrar} style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 30, height: 30, color: "#fff", fontSize: 17, cursor: "pointer" }}>×</button>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>Contribución de acceso</span>
+            <span style={{ color: "#fff", fontWeight: 900, fontSize: 24, letterSpacing: -0.5 }}>{PAGO_CONFIG.montoTexto}</span>
+          </div>
+        </div>
+
+        <div style={{ padding: "20px 22px" }}>
+
+          {/* PASO: NEQUI */}
+          {paso === "nequi" && (
+            <>
+              <div style={{ background: "#f0faf5", border: "1.5px solid #2d8c5e", borderRadius: 14, padding: "16px 18px", marginBottom: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                  <span style={{ fontSize: 26 }}>📱</span>
+                  <div>
+                    <div style={{ fontWeight: 700, color: "#1a6640", fontSize: 14 }}>Paga con Nequi</div>
+                    <div style={{ fontSize: 12, color: "#666" }}>Abre tu app y transfiere al número</div>
+                  </div>
+                </div>
+
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  {[
+                    ["Número Nequi", PAGO_CONFIG.nequiNumero, true],
+                    ["Monto exacto", PAGO_CONFIG.montoTexto, true],
+                    ["Concepto", PAGO_CONFIG.concepto, false],
+                    ["Nombre", PAGO_CONFIG.nombreCuenta, false],
+                  ].map(([k, v, bold]) => (
+                    <tr key={k} style={{ borderBottom: "1px solid #c8e6d4" }}>
+                      <td style={{ padding: "7px 0", color: "#666", fontSize: 12, fontWeight: 600, width: "38%" }}>{k}</td>
+                      <td style={{ padding: "7px 0", display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: bold ? 800 : 400, color: bold ? "#1a1a1a" : "#444" }}>{v}</span>
+                        {bold && (
+                          <button onClick={() => copiar(v)} title="Copiar" style={{ background: "none", border: "1px solid #c8e6d4", borderRadius: 5, padding: "1px 7px", fontSize: 10, cursor: "pointer", color: "#2d8c5e" }}>Copiar</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </table>
+              </div>
+
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 13, fontWeight: 700, color: "#333", display: "block", marginBottom: 6 }}>
+                  Referencia o comprobante del pago *
+                </label>
+                <input
+                  type="text"
+                  value={referencia}
+                  onChange={e => { setReferencia(e.target.value); setError(""); }}
+                  onKeyDown={e => e.key === "Enter" && confirmar()}
+                  placeholder="Ingresa el número de referencia Nequi"
+                  style={{
+                    width: "100%", border: `1.5px solid ${error ? "#f5a0a0" : "#c8e6d4"}`,
+                    borderRadius: 10, padding: "11px 13px", fontSize: 14,
+                    boxSizing: "border-box", outline: "none",
+                  }}
+                />
+                {error && <div style={{ color: "#c0392b", fontSize: 12, marginTop: 5 }}>⚠️ {error}</div>}
+                <div style={{ fontSize: 11, color: "#aaa", marginTop: 5 }}>
+                  Encuentra la referencia en el historial de transacciones de tu app Nequi.
+                </div>
+              </div>
+
+              <button
+                onClick={confirmar}
+                style={{
+                  width: "100%", background: "linear-gradient(135deg, #2d8c5e, #1a6644)",
+                  color: "#fff", border: "none", borderRadius: 11, padding: "13px",
+                  fontSize: 15, fontWeight: 700, cursor: "pointer",
+                }}
+              >
+                ✓ Confirmar pago y activar
+              </button>
+            </>
+          )}
+
+          {/* PASO: PROCESANDO */}
+          {paso === "procesando" && (
+            <div style={{ textAlign: "center", padding: "24px 0" }}>
+              <div style={{ fontSize: 44, marginBottom: 14, display: "inline-block", animation: "spin 1s linear infinite" }}>⏳</div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: "#333" }}>Verificando referencia...</div>
+              <div style={{ color: "#888", fontSize: 13, marginTop: 6 }}>Un momento por favor</div>
+            </div>
+          )}
+
+          {/* PASO: GRACIAS */}
+          {paso === "gracias" && (
+            <div style={{ textAlign: "center", padding: "8px 0" }}>
+              <div style={{ fontSize: 56, marginBottom: 10 }}>🎉</div>
+              <div style={{ fontWeight: 800, fontSize: 20, color: "#1a6640", marginBottom: 10 }}>¡Pago confirmado!</div>
+              <div style={{ color: "#444", fontSize: 14, lineHeight: 1.75, marginBottom: 22 }}>
+                <strong>Muchas gracias por confiar en nuestra plataforma.</strong>
+                <br />
+                Tu aporte nos ayuda a seguir ofreciendo este servicio gratuitamente a todos los colombianos que lo necesitan.
+                <br /><br />
+                Tu documento legal oficial está listo para descargar y enviar. Esperamos que tu reclamación sea resuelta de forma favorable y oportuna.
+              </div>
+              <button
+                onClick={onPagado}
+                style={{
+                  width: "100%", background: "linear-gradient(135deg, #2d8c5e, #1a6644)",
+                  color: "#fff", border: "none", borderRadius: 12, padding: "14px",
+                  fontSize: 15, fontWeight: 700, cursor: "pointer",
+                }}
+              >
+                {iconAccion} {textoAccion}
+              </button>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const SECTION_NAMES = [
   "HECHOS", "FUNDAMENTOS DE DERECHO", "PETICIÓN", "NOTIFICACIÓN", "PARTES",
   "DERECHO FUNDAMENTAL VULNERADO", "PRETENSIONES", "SOLICITUD",
@@ -496,7 +658,7 @@ function isSectionHeader(t) {
     /^(PRIMERA|SEGUNDA|TERCERA|CUARTA)$/.test(t);
 }
 
-function generatePDF(docData) {
+function generatePDF(docData, pagado = false) {
   const pdf     = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
   const margin  = 22;
   const pageW   = pdf.internal.pageSize.getWidth();
@@ -631,15 +793,20 @@ function generatePDF(docData) {
     pdf.setDrawColor(210,210,210); pdf.setLineWidth(0.3);
     pdf.line(margin, pageH - 12, pageW - margin, pageH - 12);
     pdf.setFontSize(7); pdf.setTextColor(155,155,155);
-    pdf.text("Borrador generado con apoyo tecnológico · Revisar con la Defensoría del Pueblo antes de radicar.", margin, pageH - 7);
+    pdf.text(
+      pagado
+        ? "Documento oficial generado por Plataforma Reclamaciones EPS Colombia."
+        : "Borrador generado con apoyo tecnológico · Revisar con la Defensoría del Pueblo antes de radicar.",
+      margin, pageH - 7
+    );
     pdf.text(`Pág. ${p}/${total}`, pageW - margin - 14, pageH - 7);
   }
 
   pdf.save(`${(docData.tipo || "reclamo").replace(/\s+/g, "-").toLowerCase()}-${Date.now()}.pdf`);
 }
 
-function handleEnviarEPS(docData, datosUsuario) {
-  generatePDF(docData);
+function handleEnviarEPS(docData, datosUsuario, pagado = false) {
+  generatePDF(docData, pagado);
   const epsKey = detectarEPS(datosUsuario.eps || docData.destinatario);
   const epsInfo = epsKey ? EPS_DATABASE[epsKey] : null;
   const to = epsInfo?.email || "";
@@ -804,6 +971,7 @@ function PanelEnvio({ docData, datos }) {
   const epsKey = detectarEPS(datos?.eps || docData?.destinatario);
   const epsInfo = epsKey ? EPS_DATABASE[epsKey] : null;
   const [copiado, setCopiado] = useState(false);
+  const [pagoModal, setPagoModal] = useState(null); // null | "pdf" | "enviar"
   const copiarEmail = (email) => {
     navigator.clipboard.writeText(email).then(() => {
       setCopiado(true); setTimeout(() => setCopiado(false), 2000);
@@ -812,22 +980,37 @@ function PanelEnvio({ docData, datos }) {
   const color = TIPO_COLOR[docData?.tipo] || [45, 140, 94];
   const colorStr = `rgb(${color.join(",")})`;
 
+  const onPagado = (accion) => {
+    setPagoModal(null);
+    if (accion === "enviar") handleEnviarEPS(docData, datos || {}, true);
+    else generatePDF(docData, true);
+  };
+
   return (
+    <>
+      {pagoModal && (
+        <PagoModal
+          accion={pagoModal}
+          onPagado={() => onPagado(pagoModal)}
+          onCerrar={() => setPagoModal(null)}
+        />
+      )}
+
     <div style={{ background: "#f9fbf9", border: `1.5px solid ${colorStr}`, borderRadius: 14, padding: "16px 18px", marginTop: 10, fontFamily: "system-ui" }}>
       <div style={{ fontWeight: 700, fontSize: 13, color: colorStr, marginBottom: 12 }}>📤 Enviar documento</div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         <button
-          onClick={() => handleEnviarEPS(docData, datos || {})}
+          onClick={() => setPagoModal("enviar")}
           style={{ background: colorStr, color: "#fff", border: "none", borderRadius: 9, padding: "10px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", flex: 1 }}
         >
-          📧 Enviar al EPS — descarga PDF + abre email
+          📧 Enviar al EPS — PDF oficial + email
         </button>
         <button
-          onClick={() => generatePDF(docData)}
+          onClick={() => setPagoModal("pdf")}
           style={{ background: "#fff", color: colorStr, border: `1.5px solid ${colorStr}`, borderRadius: 9, padding: "10px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
         >
-          ⬇ Solo PDF
+          ⬇ Descargar PDF oficial
         </button>
       </div>
 
@@ -874,9 +1057,10 @@ function PanelEnvio({ docData, datos }) {
       </div>
 
       <div style={{ marginTop: 8, fontSize: 11, color: "#aaa", lineHeight: 1.5 }}>
-        "Enviar al EPS" descarga el PDF y abre tu correo con destinatario pre-llenado. Adjunta el PDF y envía. El PDF tiene el texto completo del documento legal.
+        Al confirmar el pago Nequi ($5.000), se activa la descarga del PDF oficial y el envío al correo de la EPS.
       </div>
     </div>
+    </>
   );
 }
 
