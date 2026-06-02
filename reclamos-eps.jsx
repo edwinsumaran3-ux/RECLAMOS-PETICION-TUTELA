@@ -168,6 +168,13 @@ function getStreamingDisplay(text) {
   return text.slice(0, s).trim();
 }
 
+// Elimina aclaraciones entre paréntesis de las opciones del desplegable
+// para que el texto quede limpio en el documento legal
+function cleanOpcion(str) {
+  if (!str) return str;
+  return str.replace(/\s*\([^)]*\)/g, "").trim();
+}
+
 // ─────────────────────────────────────────────────────────────
 // PLANTILLAS LEGALES — Redactadas por nosotros
 // La IA solo proporciona los datos del usuario
@@ -182,9 +189,9 @@ function plantillaPQRS(d) {
   const eps = d.eps || "[EPS]";
   const contacto = d.contacto || "[DATO PENDIENTE]";
   const ciudad = d.ciudad || "Colombia";
-  const servicio = d.servicio_solicitado || d.problema || "[DATO PENDIENTE]";
+  const servicio = cleanOpcion(d.servicio_solicitado || d.problema) || "[DATO PENDIENTE]";
   const desde = d.desde_cuando || "[fecha]";
-  const solicitud = d.solicitud_concreta || "[DATO PENDIENTE]";
+  const solicitud = cleanOpcion(d.solicitud_concreta) || "[DATO PENDIENTE]";
 
   return {
     tipo: "PQRS",
@@ -248,10 +255,10 @@ function plantillaDerechoPeticion(d) {
   const eps = d.eps || "[EPS]";
   const contacto = d.contacto || "[DATO PENDIENTE]";
   const ciudad = d.ciudad || "Colombia";
-  const servicio = d.servicio_solicitado || d.problema || "[DATO PENDIENTE]";
+  const servicio = cleanOpcion(d.servicio_solicitado || d.problema) || "[DATO PENDIENTE]";
   const desde = d.desde_cuando || "[fecha]";
   const respEPS = d.respuesta_eps || "Sin respuesta formal.";
-  const solicitud = d.solicitud_concreta || "[DATO PENDIENTE]";
+  const solicitud = cleanOpcion(d.solicitud_concreta) || "[DATO PENDIENTE]";
 
   return {
     tipo: "DERECHO DE PETICIÓN",
@@ -319,10 +326,10 @@ function plantillaPrioritaria(d) {
   const eps = d.eps || "[EPS]";
   const contacto = d.contacto || "[DATO PENDIENTE]";
   const ciudad = d.ciudad || "Colombia";
-  const servicio = d.servicio_solicitado || d.problema || "[DATO PENDIENTE]";
+  const servicio = cleanOpcion(d.servicio_solicitado || d.problema) || "[DATO PENDIENTE]";
   const desde = d.desde_cuando || "[fecha]";
   const respEPS = d.respuesta_eps || "Sin respuesta formal.";
-  const solicitud = d.solicitud_concreta || "[DATO PENDIENTE]";
+  const solicitud = cleanOpcion(d.solicitud_concreta) || "[DATO PENDIENTE]";
 
   return {
     tipo: "SOLICITUD PRIORITARIA",
@@ -389,10 +396,10 @@ function plantillaTutela(d) {
   const eps = d.eps || "[EPS]";
   const contacto = d.contacto || "[DATO PENDIENTE]";
   const ciudad = d.ciudad || "Colombia";
-  const servicio = d.servicio_solicitado || d.problema || "[DATO PENDIENTE]";
+  const servicio = cleanOpcion(d.servicio_solicitado || d.problema) || "[DATO PENDIENTE]";
   const desde = d.desde_cuando || "[fecha]";
   const respEPS = d.respuesta_eps || "Sin respuesta formal.";
-  const solicitud = d.solicitud_concreta || "[DATO PENDIENTE]";
+  const solicitud = cleanOpcion(d.solicitud_concreta) || "[DATO PENDIENTE]";
 
   return {
     tipo: "TUTELA PRELIMINAR",
